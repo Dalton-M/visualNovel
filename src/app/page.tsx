@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import StoryDisplay from '@/components/StoryDisplay';
 import { StreamingXMLParser } from '@/lib/xml-parser';
-import { StorySegment, Choice, StreamingState } from '@/types';
+import { StorySegment, StreamingState } from '@/types';
 
 export default function Home() {
   const [prompt, setPrompt] = useState('');
-  const [streamingState, setStreamingState] = useState<StreamingState>({
+  const [streamingState] = useState<StreamingState>({
     currentText: '',
     isTyping: false,
     choices: [],

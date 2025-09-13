@@ -1,6 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { NextRequest } from 'next/server';
 
 // Complete sample XML data from sample.xml
 const SAMPLE_XML = `<Narrator>The warm scent of chili oil and sizzling meat wraps around me as I step inside Wanmin Restaurant.</Narrator> <Narrator>The cheerful chatter dies instantly, and I freeze as every head turns toward the door.</Narrator>
@@ -8,19 +6,18 @@ const SAMPLE_XML = `<Narrator>The warm scent of chili oil and sizzling meat wrap
 <Narrator>The tension in the air mingles with curiosity as four pairs of eyes watch you, each holding their own secrets and expectations.</Narrator>`;
 
 export async function POST(request: NextRequest) {
-  const { prompt } = await request.json();
+  await request.json(); // Parse request body (prompt not used in mock implementation)
 
   // Create a ReadableStream for streaming response
   const stream = new ReadableStream({
     start(controller) {
       let index = 0;
-      let timerId: NodeJS.Timeout;
       const xmlData = SAMPLE_XML;
 
       const sendNext = () => {
         if (index >= xmlData.length) {
           controller.close();
-          if (timerId) clearInterval(timerId);
+          clearInterval(intervalId);
           return;
         }
 
@@ -31,11 +28,11 @@ export async function POST(request: NextRequest) {
           index++;
         } catch (error) {
           controller.error(error);
-          if (timerId) clearInterval(timerId);
+          clearInterval(intervalId);
         }
       };
 
-      timerId = setInterval(sendNext, 20); // 20ms delay between characters
+      const intervalId = setInterval(sendNext, 20); // 20ms delay between characters
     },
   });
 

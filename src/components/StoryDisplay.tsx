@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import CharacterAvatar from './CharacterAvatar';
 import TypingText from './TypingText';
 import { StorySegment, Choice } from '@/types';
@@ -148,9 +149,11 @@ export default function StoryDisplay({
                 'Move to next sentence'
               }
             >
-              <img 
+              <Image 
                 src="/fast-forward.png" 
                 alt="Fast Forward" 
+                width={24}
+                height={24}
                 className="w-6 h-6"
               />
             </button>
