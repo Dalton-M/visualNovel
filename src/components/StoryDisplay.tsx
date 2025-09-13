@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import CharacterAvatar from './CharacterAvatar';
 import TypingText from './TypingText';
 import { StorySegment, Choice } from '@/types';
@@ -21,10 +21,14 @@ export default function StoryDisplay({
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
   const [showChoices, setShowChoices] = useState(false);
   const [isNewStory, setIsNewStory] = useState(true);
+  const [isTyping, setIsTyping] = useState(false);
+  const [shouldSkip, setShouldSkip] = useState(false);
+  const [textCompleted, setTextCompleted] = useState(false);
 
   const currentSegment = segments[currentSegmentIndex];
 
   const handleTypingComplete = () => {
+    setTextCompleted(true);
     if (currentSegmentIndex < segments.length - 1) {
       setTimeout(() => {
         setCurrentSegmentIndex(prev => prev + 1);
@@ -33,6 +37,36 @@ export default function StoryDisplay({
       setShowChoices(true);
     }
   };
+
+  const handleFastForward = () => {
+    if (isTyping && !textCompleted) {
+      // Stage 2: Skip typing animation - display all text immediately
+      setShouldSkip(true);
+    } else if (textCompleted && currentSegmentIndex < segments.length - 1) {
+      // Stage 3: Move to next sentence
+      setCurrentSegmentIndex(prev => prev + 1);
+    }
+  };
+
+  // Use a ref to track the last processed text to ensure skip state resets immediately
+  const lastProcessedText = useRef<string>('');
+  
+  // Reset states when moving to a new segment OR when segment text changes
+  useEffect(() => {
+    setShouldSkip(false);
+    setTextCompleted(false);
+  }, [currentSegmentIndex]);
+  
+  // Reset skip state immediately when text content changes
+  if (currentSegment?.text && currentSegment.text !== lastProcessedText.current) {
+    lastProcessedText.current = currentSegment.text;
+    if (shouldSkip) {
+      setShouldSkip(false);
+    }
+    if (textCompleted) {
+      setTextCompleted(false);
+    }
+  }
 
   useEffect(() => {
     // Only reset to index 0 when segments array is completely new (length goes from 0 to something)
@@ -60,7 +94,7 @@ export default function StoryDisplay({
   return (
     <div className="max-w-4xl mx-auto p-6">
       {/* Story Display Area */}
-      <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-8 min-h-[400px]">
+      <div className="relative bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-8 pr-16 min-h-[400px]">
         {currentSegment && (
           <div className="flex items-start gap-6">
             {/* Character Avatar - only show for character segments */}
@@ -83,6 +117,8 @@ export default function StoryDisplay({
                 text={currentSegment.text}
                 speed={30}
                 onComplete={handleTypingComplete}
+                onTypingChange={setIsTyping}
+                skipTyping={shouldSkip}
                 className={
                   currentSegment.type === 'narrator' 
                     ? 'text-gray-700 italic' 
@@ -90,6 +126,34 @@ export default function StoryDisplay({
                 }
               />
             </div>
+          </div>
+        )}
+
+        {/* Fast Forward Button */}
+        {currentSegment && (
+          <div className="absolute top-4 right-4">
+            <button
+              onClick={handleFastForward}
+              disabled={!currentSegment || (!isTyping && !textCompleted) || (textCompleted && currentSegmentIndex >= segments.length - 1)}
+              className={`p-2 rounded-lg shadow-lg transition-colors ${
+                (!currentSegment || (!isTyping && !textCompleted) || (textCompleted && currentSegmentIndex >= segments.length - 1))
+                  ? 'bg-gray-400/60 cursor-not-allowed opacity-50' 
+                  : 'bg-white/80 hover:bg-white cursor-pointer'
+              }`}
+              title={
+                !currentSegment ? 'No content available' :
+                (!isTyping && !textCompleted) ? 'Waiting for content...' :
+                (textCompleted && currentSegmentIndex >= segments.length - 1) ? 'No more content' :
+                (isTyping && !textCompleted) ? 'Skip typing animation' :
+                'Move to next sentence'
+              }
+            >
+              <img 
+                src="/fast-forward.png" 
+                alt="Fast Forward" 
+                className="w-6 h-6"
+              />
+            </button>
           </div>
         )}
 
