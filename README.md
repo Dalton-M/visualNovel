@@ -83,26 +83,6 @@ visual-novel/
 └── README.md
 ```
 
-## Character System
-
-### Available Characters
-- **Lumine**: The traveler protagonist
-- **Tartaglia**: Hydro Harbinger  
-- **Venti**: Anemo Archon
-- **Zhongli**: Geo Archon
-
-### Available Emotions
-`Neutral`, `Happy`, `Sad`, `Angry`, `Surprised`, `Confident`, `Annoyed`, `Very Happy`, `Thinking`, `Concern`, `Blushing`, `Crying`, `Deeply In Love`, `Disgusted`, `Fear`
-
-### Asset Requirements
-Character avatars are located in:
-```
-public/[CharacterName]/[Emotion].png
-```
-- **Size**: 192x192 pixels
-- **Format**: PNG with transparency
-- **Naming**: Exact case-sensitive emotion names
-
 ## Fast Forward System
 
 The application features a three-stage fast forward system:
